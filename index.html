@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reto de Rita | Base de datos de aeropuertos</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-50 font-sans leading-relaxed text-slate-700 antialiased [&_a]:underline-offset-4 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-offset-4 [&_a:focus-visible]:outline-teal-600 [&_code]:font-mono [&_code]:text-[0.875em] [&_code]:wrap-anywhere [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:tracking-tight [&_h2]:text-slate-950 sm:[&_h2]:text-3xl [&_h3]:mb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-slate-900">
+    <header class="border-b border-slate-800 bg-slate-950 px-5 py-12 sm:px-8 sm:py-20 lg:px-12">
+        <div class="mx-auto max-w-6xl">
+        <p class="text-xs font-bold uppercase tracking-widest text-teal-300">Reto de Rita · Bases de Datos</p>
+        <h1 class="mt-5 max-w-4xl text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">De un JSON a un modelo relacional</h1>
+        <p class="mt-6 max-w-2xl text-lg text-slate-300 sm:text-xl">Aeropuertos como datos de partida. Rutas y vuelos como ampliación para hacer pruebas.</p>
+        <nav class="mt-9 flex flex-col gap-3 text-sm font-medium sm:flex-row sm:flex-wrap [&_a]:rounded-xl [&_a]:border [&_a]:border-slate-700 [&_a]:px-4 [&_a]:py-3 [&_a]:text-slate-200 [&_a]:transition-colors [&_a:hover]:border-teal-400 [&_a:hover]:text-teal-300" aria-label="Secciones">
+            <a href="#diagrama">01. Diagrama E-R</a>
+            <a href="#modelo">02. Modelo relacional</a>
+            <a href="#normalizacion">03. Normalización</a>
+            <a href="#buenas-practicas">04. Buenas prácticas</a>
+            <a href="#explorador">05. Aeropuertos JSON</a>
+        </nav>
+        </div>
+    </header>
+
+    <main class="mx-auto max-w-6xl space-y-14 px-5 py-8 sm:space-y-20 sm:px-8 sm:py-12 lg:px-12 [&_section]:scroll-mt-6 [&_section>p]:mt-4 [&_article]:min-w-0 [&_article]:rounded-2xl [&_article]:border [&_article]:border-slate-200 [&_article]:bg-white [&_article]:p-5 [&_article]:shadow-sm sm:[&_article]:p-7 [&_article_p]:mt-4 [&_article_ul]:mt-4 [&_article_ul]:list-disc [&_article_ul]:space-y-2 [&_article_ul]:pl-5 [&_table]:w-full [&_table]:min-w-[36rem] [&_table]:border-collapse [&_table]:text-left [&_table]:text-sm [&_caption]:py-4 [&_caption]:text-left [&_caption]:font-semibold [&_caption]:text-slate-900 [&_th]:bg-slate-100 [&_th]:font-semibold [&_th]:text-slate-800 [&_th]:p-3 [&_td]:p-3 [&_th]:align-top [&_td]:align-top [&_th]:border-b [&_td]:border-b [&_th]:border-slate-200 [&_td]:border-slate-100 [&_tbody_tr:nth-child(even)]:bg-slate-50">
+        <aside class="space-y-4 rounded-2xl border border-teal-200 border-l-4 border-l-teal-600 bg-teal-50 p-5 sm:p-7 [&_a]:font-medium [&_a]:text-teal-800 [&_a]:underline [&_a:hover]:text-teal-950" aria-labelledby="alcance">
+            <h2 id="alcance">Qué contiene la fuente y qué proponemos</h2>
+            <p>El <a href="https://raw.githubusercontent.com/aashishvanand/airport-data-js/refs/heads/main/data/airports.json">JSON original de aeropuertos</a>
+                contiene códigos, nombres, ubicación y características de aeropuertos. <strong>No contiene vuelos ni rutas.</strong>
+                Tampoco todos sus registros tienen servicio regular.</p>
+            <p><span class="inline-block rounded-md bg-teal-100 px-2.5 py-1 align-middle text-xs font-semibold text-teal-900">Derivado del JSON</span> PAISES y AEROPUERTOS.
+                <span class="inline-block rounded-md bg-amber-100 px-2.5 py-1 align-middle text-xs font-semibold text-amber-900">Ampliación propuesta</span> RUTAS y VUELOS; se poblarían con datos sintéticos, no extraídos.</p>
+            <p>Esta página documenta un diseño: no crea una base de datos ni genera vuelos automáticamente.</p>
+        </aside>
+
+        <section id="diagrama" aria-labelledby="titulo-diagrama">
+            <details class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <summary class="cursor-pointer rounded-2xl p-5 text-teal-700 transition-colors hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:p-7">
+                    <h2 class="inline" id="titulo-diagrama">01. Diagrama entidad-relación</h2>
+                </summary>
+                <div class="space-y-6 border-t border-slate-100 p-5 sm:p-7">
+            <p>Diagrama lógico simplificado. Las etiquetas indican cuántas entidades de cada extremo pueden participar.
+                Las dos relaciones de AEROPUERTOS con RUTAS tienen roles diferentes.</p>
+            <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:p-5" tabindex="0" role="region" aria-label="Diagrama desplazable">
+                <svg class="block min-w-[760px] w-full [&_text]:fill-slate-800 [&_text]:text-sm" viewBox="0 0 960 470" role="img" aria-label="Diagrama entidad-relación de países, aeropuertos, rutas y vuelos">
+                    <g class="fill-none stroke-slate-500 stroke-2">
+                        <path d="M240 110 H350"/>
+                        <path d="M590 85 H640 V95 H710"/>
+                        <path d="M590 160 H660 V180 H710"/>
+                        <path d="M830 240 V335 H590"/>
+                    </g>
+                    <g class="[&_rect]:fill-teal-50 [&_rect]:stroke-teal-700 [&_rect]:stroke-2">
+                        <rect x="20" y="55" width="220" height="120" rx="10"/>
+                        <text x="40" y="85" class="font-bold">PAISES</text>
+                        <text x="40" y="115">PK codigo_pais</text>
+                        <text x="40" y="145">Derivado del JSON</text>
+                        <rect x="350" y="35" width="240" height="205" rx="10"/>
+                        <text x="370" y="65" class="font-bold">AEROPUERTOS</text>
+                        <text x="370" y="100">PK id_aeropuerto</text>
+                        <text x="370" y="130">FK codigo_pais (opcional)</text>
+                        <text x="370" y="160">nombre, iata, icao, …</text>
+                        <text x="370" y="210">Derivado del JSON</text>
+                    </g>
+                    <g class="[&_rect]:fill-amber-50 [&_rect]:stroke-amber-700 [&_rect]:stroke-2 [&_rect]:[stroke-dasharray:6_3]">
+                        <rect x="710" y="35" width="230" height="205" rx="10"/>
+                        <text x="730" y="65" class="font-bold">RUTAS</text>
+                        <text x="730" y="100">PK id_ruta</text>
+                        <text x="730" y="130">FK id_origen</text>
+                        <text x="730" y="160">FK id_destino</text>
+                        <text x="730" y="210">Propuesta · Sin datos</text>
+                        <rect x="350" y="290" width="240" height="155" rx="10"/>
+                        <text x="370" y="320" class="font-bold">VUELOS</text>
+                        <text x="370" y="350">PK id_vuelo</text>
+                        <text x="370" y="380">FK id_ruta</text>
+                        <text x="370" y="420">Propuesta · Sin datos</text>
+                    </g>
+                    <g class="font-semibold">
+                        <!-- PAISES - AEROPUERTOS -->
+                        <text x="251" y="98">0..N</text>
+                        <text x="307" y="98">0..1</text>
+
+                        <!-- AEROPUERTOS - RUTAS: origen -->
+                        <text x="603" y="73">0..N</text>
+                        <text x="666" y="82">1..1</text>
+                        <text x="609" y="145">origen</text>
+
+                        <!-- AEROPUERTOS - RUTAS: destino -->
+                        <text x="603" y="188">0..N</text>
+                        <text x="666" y="204">1..1</text>
+                        <text x="609" y="225">destino</text>
+
+                        <!-- RUTAS - VUELOS -->
+                        <text x="844" y="264">0..N</text>
+                        <text x="603" y="325">1..1</text>
+                    </g>
+                </svg>
+            </div>
+            <ul class="list-disc space-y-3 pl-5">
+                <li><strong>PAISES — AEROPUERTOS:</strong> un país tiene 0..N aeropuertos; un aeropuerto tiene 0..1 país conocido.
+                    La FK es opcional para admitir códigos ausentes en la fuente.</li>
+                <li><strong>AEROPUERTOS — RUTAS (origen):</strong> un aeropuerto origina 0..N rutas; cada ruta tiene exactamente 1 origen.</li>
+                <li><strong>AEROPUERTOS — RUTAS (destino):</strong> un aeropuerto recibe 0..N rutas; cada ruta tiene exactamente 1 destino.</li>
+                <li><strong>RUTAS — VUELOS:</strong> una ruta tiene 0..N vuelos programados; cada vuelo pertenece exactamente a 1 ruta.</li>
+            </ul>
+            <p>Una ruta resuelve una conexión dirigida entre aeropuertos. Un vuelo añade la ocurrencia temporal.
+                No se deduce la existencia de ninguna de las dos a partir de que dos aeropuertos aparezcan en el JSON.</p>
+                </div>
+            </details>
+        </section>
+
+        <section id="modelo" aria-labelledby="titulo-modelo">
+            <details class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <summary class="cursor-pointer rounded-2xl p-5 text-teal-700 transition-colors hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:p-7">
+                    <h2 class="inline" id="titulo-modelo">02. Modelo relacional</h2>
+                </summary>
+                <div class="space-y-6 border-t border-slate-100 p-5 sm:p-7">
+                    <h3>MODELO RELACIONAL</h3>
+                    <p><code>PAISES</code> (<span class="underline decoration-2 underline-offset-4">codigo_pais</span>)</p>
+                    <p class="wrap-anywhere"><code>AEROPUERTOS</code> (<span class="underline decoration-2 underline-offset-4">id_aeropuerto</span>, iata, icao, nombre, codigo_pais, continente_reportado, zona_horaria, desfase_utc_reportado, latitud, longitud, elevacion_pies, tipo, servicio_regular, wikipedia, web, longitud_pista_pies, flightradar24_url, radarbox_url, flightaware_url)</p>
+                    <p><code>RUTAS</code> (<span class="underline decoration-2 underline-offset-4">id_ruta</span>, id_origen, id_destino)</p>
+                    <p class="wrap-anywhere"><code>VUELOS</code> (<span class="underline decoration-2 underline-offset-4">id_vuelo</span>, id_ruta, codigo_vuelo, salida_programada, llegada_programada)</p>
+                    <p>Donde:</p>
+                    <ul class="list-disc space-y-2 pl-5">
+                        <li><code>AEROPUERTOS.codigo_pais</code> → <code>PAISES.codigo_pais</code></li>
+                        <li><code>RUTAS.id_origen</code> → <code>AEROPUERTOS.id_aeropuerto</code></li>
+                        <li><code>RUTAS.id_destino</code> → <code>AEROPUERTOS.id_aeropuerto</code></li>
+                        <li><code>VUELOS.id_ruta</code> → <code>RUTAS.id_ruta</code></li>
+                    </ul>
+                </div>
+            </details>
+        </section>
+
+        <section id="normalizacion" aria-labelledby="titulo-normalizacion">
+            <details class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <summary class="cursor-pointer rounded-2xl p-5 text-teal-700 transition-colors hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:p-7">
+                    <h2 class="inline" id="titulo-normalizacion">03. Normalización: 1FN, 2FN y 3FN</h2>
+                </summary>
+                <div class="space-y-6 border-t border-slate-100 p-5 sm:p-7">
+            <p>La normalización depende de las reglas del dominio, no solo de añadir identificadores.
+                Estas son las dependencias funcionales que asumimos para el diseño propuesto.</p>
+            <p class="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">La revisión de 1FN, 2FN y 3FN corresponde al modelo lógico propuesto.
+                Todavía no hemos creado físicamente las tablas ni sus restricciones. Al implementarlas habrá que definir las PK y FK,
+                garantizar la unicidad de la pareja de origen y destino en RUTAS y validar los datos importados.</p>
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <article>
+                    <h3>1FN · Valores atómicos</h3>
+                    <p>El diseño prevé un único valor por celda: un código, una coordenada o una fecha.
+                        No incluye listas de destinos ni columnas como <code>vuelo_1</code> y <code>vuelo_2</code>.
+                        Cada relación tiene una PK definida para identificar sus futuras filas.</p>
+                </article>
+                <article>
+                    <h3>2FN · Dependencia completa</h3>
+                    <p>El modelo cumple 1FN y, bajo las dependencias asumidas, cada atributo no clave depende de una clave completa.
+                        Las PK son simples. Además, suponiendo única la pareja <code>(id_origen, id_destino)</code> en RUTAS,
+                        esta es una clave candidata que determina la ruta completa; no hay atributos descriptivos que dependan solo de un extremo.</p>
+                </article>
+                <article>
+                    <h3>3FN · Sin dependencias transitivas</h3>
+                    <p>Bajo las dependencias asumidas, el modelo cumple 2FN y no introduce dependencias transitivas entre atributos no clave.
+                        VUELOS incluye <code>id_ruta</code>, no sus aeropuertos; RUTAS incluye los identificadores de los aeropuertos,
+                        no sus nombres ni países. Esos datos se recuperarían con JOIN al implementar la base de datos.</p>
+                </article>
+            </div>
+            <article>
+                <h3>Dependencias que justifican el modelo</h3>
+                <ul>
+                    <li><code>id_aeropuerto → atributos del aeropuerto</code>.</li>
+                    <li><code>id_ruta → id_origen, id_destino</code>; también <code>(id_origen, id_destino) → id_ruta</code>.</li>
+                    <li><code>id_vuelo → id_ruta, codigo_vuelo, salida_programada, llegada_programada</code>.</li>
+                    <li>PAISES solo contiene su clave: no tiene atributos no clave que introduzcan dependencias transitivas.</li>
+                </ul>
+                <p>Repetir un código de país o un tipo de aeropuerto no viola por sí mismo la 3FN.
+                    PAISES se separa para controlar la integridad referencial. Si añadimos su nombre, se almacenará allí,
+                    porque <code>codigo_pais → nombre_pais</code>, no en cada aeropuerto.</p>
+                <p>El continente se conserva como dato reportado por aeropuerto: no asumimos <code>pais → continente</code>.
+                    Tampoco asumimos <code>zona_horaria → desfase_utc</code> permanente: el desfase cambia con la fecha y el horario de verano.
+                    Para calcular horarios de vuelos se usarían la zona IANA y la fecha, no el desfase de la captura.</p>
+            </article>
+                </div>
+            </details>
+        </section>
+
+        <section id="buenas-practicas" aria-labelledby="titulo-buenas-practicas">
+            <details class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <summary class="cursor-pointer rounded-2xl p-5 text-teal-700 transition-colors hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:p-7">
+                    <h2 class="inline" id="titulo-buenas-practicas">04. Buenas prácticas aplicadas al diseño</h2>
+                </summary>
+                <div class="space-y-6 border-t border-slate-100 p-5 sm:p-7">
+                    <p>El modelo propuesto sigue estas buenas prácticas de diseño relacional:</p>
+                    <ul class="list-disc space-y-2 pl-5">
+                        <li>Nombres de tablas en plural y campos con nombres claros y coherentes.</li>
+                        <li>Claves primarias definidas para identificar cada registro y claves foráneas para relacionar las tablas.</li>
+                        <li>Separación de países, aeropuertos, rutas y vuelos, evitando repetir datos descriptivos de otras entidades.</li>
+                        <li>Distinción explícita entre los datos derivados del JSON y las rutas y vuelos propuestos para pruebas.</li>
+                    </ul>
+                    <p>Estas prácticas complementan la normalización, pero no sustituyen la comprobación de 1FN, 2FN y 3FN.
+                        Su cumplimiento se refiere al diseño: al crear la base de datos habrá que implementar las PK, FK y restricciones,
+                        incluida la unicidad de la pareja de origen y destino en RUTAS, y validar los datos importados.</p>
+                </div>
+            </details>
+        </section>
+
+        <section id="explorador" aria-labelledby="titulo-explorador">
+            <details class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <summary class="cursor-pointer rounded-2xl p-5 text-teal-700 transition-colors hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-600 sm:p-7">
+                    <h2 class="inline" id="titulo-explorador">
+                        05. Explorador de aeropuertos · JSON real
+                    </h2>
+                </summary>
+
+                <div class="space-y-6 border-t border-slate-100 p-5 sm:p-7">
+                    <p>
+                        Datos obtenidos directamente del JSON original.
+                        Esta tabla no contiene rutas ni vuelos simulados.
+                    </p>
+
+                    <p id="estado" role="status" aria-live="polite"
+                       class="rounded-xl bg-teal-50 p-4 text-sm text-teal-900">
+                        Cargando aeropuertos...
+                    </p>
+
+                    <div class="space-y-3">
+                        <label for="buscar-aeropuerto"
+                               class="block font-semibold text-slate-800">
+                            Buscar aeropuerto
+                        </label>
+
+                        <input
+                            type="search"
+                            id="buscar-aeropuerto"
+                            placeholder="IATA, nombre del aeropuerto o país..."
+                            autocomplete="off"
+                            class="w-full rounded-xl border border-slate-300
+                                   bg-white px-4 py-3 text-slate-800
+                                   placeholder:text-slate-400
+                                   focus:border-teal-600 focus:outline-none
+                                   focus:ring-2 focus:ring-teal-200"
+                        >
+
+                        <p id="resultados-busqueda"
+                           role="status"
+                           aria-live="polite"
+                           class="text-sm text-slate-600">
+                            Preparando resultados...
+                        </p>
+                    </div>
+
+                    <div class="max-h-[500px] overflow-auto rounded-xl border border-slate-200"
+                         tabindex="0" role="region"
+                         aria-label="Tabla de aeropuertos desplazable">
+                        <table>
+                            <thead class="sticky top-0 z-10">
+                                <tr>
+                                    <th scope="col">IATA</th>
+                                    <th scope="col">Aeropuerto</th>
+                                    <th scope="col">País</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-aeropuertos"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </details>
+        </section>
+    </main>
+    <footer class="mx-auto max-w-6xl border-t border-slate-200 px-5 py-8 text-sm text-slate-500 sm:px-8 lg:px-12">Reto de Rita · Diseño académico propuesto · Fuente de aeropuertos: airport-data-js</footer>
+    <script>
+        function abrirSeccionDesdeEnlace() {
+            const seccion = document.getElementById(location.hash.slice(1));
+            const desplegable = seccion?.querySelector("details");
+
+            if (desplegable) {
+                document.querySelectorAll("main section > details").forEach((detalle) => {
+                    detalle.open = detalle === desplegable;
+                });
+            }
+        }
+
+        document.querySelectorAll('nav a[href^="#"]').forEach((enlace) => {
+            enlace.addEventListener("click", () => {
+                document.querySelectorAll("main section > details").forEach((detalle) => {
+                    detalle.open = detalle.closest("section")?.id === enlace.hash.slice(1);
+                });
+            });
+        });
+        window.addEventListener("hashchange", abrirSeccionDesdeEnlace);
+        abrirSeccionDesdeEnlace();
+    </script>
+    <script src="./aeropuertos.js" defer></script>
+</body>
+</html>
